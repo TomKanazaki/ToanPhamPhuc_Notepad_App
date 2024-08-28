@@ -66,4 +66,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    //import view model
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    //import livedata
+    implementation(libs.androidx.runtime.livedata)
 }
