@@ -2,7 +2,6 @@ package com.example.toanphamphuc_notepad_app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.toanphamphuc_notepad_app.ui.theme.NotepadCommands
 import kotlinx.coroutines.launch
 
 class NoteViewModel(private val command: NotepadCommands = NotepadCommands()) : ViewModel() {

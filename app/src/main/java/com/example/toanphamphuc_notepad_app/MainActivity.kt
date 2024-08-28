@@ -15,7 +15,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -62,14 +65,15 @@ fun Note() {
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                showDialog = true
                 editingNote = null //create new note
+                showDialog = true
             }) {
                 Icon(Icons.Filled.Add, contentDescription = "Add Note")
             }
         }
     ) {
-        NoteList(notes = notes.value,
+        NoteList(
+            notes = notes.value,
             onDoneChange = { note ->
                 viewModel.updateNote(note.copy(isDone = !note.isDone))
             },
@@ -84,22 +88,21 @@ fun Note() {
     }
 
     if (showDialog) {
-        editingNote?.let { noteData ->
-            NoteManager(
-                note = noteData,
-                onDismiss = { showDialog = false },
-                onConfirm = { title, content ->
-                    if (editingNote == null) {
-                        viewModel.addNote(title, content)
-                    } else {
-                        editingNote?.let {
-                            viewModel.updateNote(it.copy(title = title, content = content))
-                        }
+        NoteManager(
+            note = editingNote?:NoteData(0, "", "", false),
+            onDismiss = { showDialog = false },
+            onConfirm = { title, content ->
+                if (editingNote == null) {
+                    viewModel.addNote(title, content)
+                } else {
+                    editingNote?.let {
+                        viewModel.updateNote(it.copy(title = title, content = content))
                     }
-                    showDialog = false
                 }
-            )
-        }
+                editingNote = null
+                showDialog = false
+            }
+        )
     }
 }
 
@@ -125,6 +128,9 @@ fun NoteItem(
     onDeleteClick: (NoteData) -> Unit,
     onEditClick: (NoteData) -> Unit
 ) {
+    var showDeleteConfirmation by remember {
+        mutableStateOf(false)
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -142,20 +148,43 @@ fun NoteItem(
             }
             IconButton(onClick = {onDoneChange(note)}) {
                 Icon(
-                    imageVector = if(note.isDone) Icons.Filled.Check else Icons.Default.Check,
+                    imageVector = if(note.isDone) Icons.Filled.CheckCircle else Icons.Default.AddCircle,
                     contentDescription = if (note.isDone) "Mark as Undone" else "Mark as Done",
                     tint = if (note.isDone) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                 )
             }
 
-            IconButton(onClick = {onEditClick(note)}) {
-                Icon(Icons.Filled.Check, contentDescription = "Edit Note")
+            IconButton(onClick = {onEditClick(note) }) {
+                Icon(Icons.Filled.Edit, contentDescription = "Edit Note")
             }
 
-            IconButton(onClick = { onDeleteClick(note) }) {
-                Icon(Icons.Filled.Check, contentDescription = "Delete Note")
+            IconButton(onClick = {showDeleteConfirmation = true}) {
+                Icon(Icons.Filled.Delete, contentDescription = "Delete Note")
             }
         }
+    }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text("Delete Note") },
+            text = { Text("Are you sure you want to delete '${note.title}'?") },
+
+            dismissButton = {
+                Button(onClick = { showDeleteConfirmation = false }) {
+                    Text("No")
+                }
+            },
+
+            confirmButton = {
+                Button(onClick = {
+                    onDeleteClick(note)
+                    showDeleteConfirmation = false
+                }) {
+                    Text("Yes")
+                }
+            }
+        )
     }
 }
 
