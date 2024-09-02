@@ -72,4 +72,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     //import livedata
     implementation(libs.androidx.runtime.livedata)
+
+    //import room
+    implementation(libs.androidx.room.ktx)
+
 }
+

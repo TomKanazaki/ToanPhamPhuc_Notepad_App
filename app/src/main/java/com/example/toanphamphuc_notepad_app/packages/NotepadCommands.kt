@@ -1,7 +1,8 @@
-package com.example.toanphamphuc_notepad_app
+package com.example.toanphamphuc_notepad_app.packages
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.toanphamphuc_notepad_app.NoteData
 
 class NotepadCommands {
     //private val notes = mutableListOf<NoteData>()
