@@ -76,5 +76,8 @@ dependencies {
     //import room
     implementation(libs.androidx.room.ktx)
 
+    //import nagivation
+    implementation(libs.androidx.navigation.compose)
+
 }
 

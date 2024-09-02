@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
@@ -30,8 +29,9 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -40,6 +40,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,70 +49,75 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-           Note()
+            Note()
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun Note() {
     val viewModel: NoteViewModel = viewModel()
-
-    var showDialog by remember { mutableStateOf(false) }
+    val navController = rememberNavController()
+    //var showDialog by remember { mutableStateOf(false) }
     var editingNote by remember { mutableStateOf<NoteData?>(null) }
 
     Scaffold(
+        topBar = {
+            TopAppBar(title = { Text("Notepad") })
+        },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                editingNote = null //create new note
-                showDialog = true
-            }) {
-                Icon(Icons.Filled.Add, contentDescription = "Add Note")
+            FloatingActionButton(
+                onClick = {
+                    editingNote = null
+                    navController.navigate("noteEdit")
+                },
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Icon(Icons.Filled.AddCircle, contentDescription = "Add Note")
             }
         }
-    ) {
-        NoteList(
-            notes = viewModel.notesLiveData,
-            onDoneChange = { note ->
-                viewModel.updateNote(note.copy(isDone = !note.isDone))
-            },
-            onDeleteClick = { note ->
-                viewModel.deleteNote(note.id)
-            },
-            onEditClick = { note ->
-                editingNote = note
-                showDialog = true
+    ) {paddingValues ->
+        NavHost(navController = navController, startDestination = "noteList", modifier = Modifier.padding(paddingValues)) {
+            composable("noteList") {
+                NoteList(
+                    notes = viewModel.notesLiveData,
+                    onDoneChange = { note -> viewModel.updateNote(note.copy(isDone = !note.isDone)) },
+                    onDeleteClick = { note -> viewModel.deleteNote(note.id) },
+                    onEditClick = { note ->
+                        editingNote = note
+                        navController.navigate("noteEdit")
+                    }
+                )
             }
-        )
+
+            composable("noteEdit") {
+                NoteEditScreen(
+                    note = editingNote,
+                    onConfirm = { updatedNote ->
+                        if (editingNote == null) {viewModel.addNote(updatedNote.title, updatedNote.content)}
+                        else {
+                            viewModel.updateNote(updatedNote)
+                        }
+                    },
+                    onNavigateBack = {navController.popBackStack()} //go back to the list
+                )
+            }
+        }
     }
 
-    if (showDialog) {
-        NoteManager(
-            note = editingNote?:NoteData(0, "", "", false),
-            onDismiss = { showDialog = false },
-            onConfirm = { title, content ->
-                if (editingNote == null) {
-                    viewModel.addNote(title, content)
-                } else {
-                    editingNote?.let {
-                        viewModel.updateNote(it.copy(title = title, content = content))
-                    }
-                }
-                editingNote = null
-                showDialog = false
-            }
-        )
-    }
 }
 
 
@@ -203,83 +209,99 @@ fun NoteItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoteManager(
+fun NoteEditScreen(
     note: NoteData?,
-    onDismiss: () -> Unit,
-    onConfirm: (String, String) -> Unit
+    onConfirm: (NoteData) -> Unit,
+    onNavigateBack: () -> Unit
 ) {
-    var title by remember { mutableStateOf(note?.title?:"") }
-    var content by remember { mutableStateOf(note?.content?:"") }
-    var selectedColor by remember { mutableStateOf(note?.backgroundColor?: Color.White) }
+    var title by remember { mutableStateOf(note?.title ?: "") }
+    var content by remember { mutableStateOf(note?.content ?: "") }
+    var selectedColor by remember { mutableStateOf(note?.backgroundColor ?: Color.White) }
 
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text( when (note) {
-            null -> "Add Note"
-            else -> "Edit Note"
-        }) },
-        text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row (modifier = Modifier.padding(8.dp)){
-                    ColorCircle(color = Color.White, isSelected = selectedColor == Color.White) {
-                        selectedColor = Color.White
-                    }
-                    ColorCircle(color = Color.Yellow, isSelected = selectedColor == Color.Yellow) {
-                        selectedColor = Color.Yellow
-                    }
-                    ColorCircle(color = Color.Green, isSelected = selectedColor == Color.Green) {
-                        selectedColor = Color.Green
-                    }
-                    ColorCircle(color = Color.Cyan, isSelected = selectedColor == Color.Cyan) {
-                        selectedColor = Color.Cyan
-                    }
-                    ColorCircle(color = Color.Magenta, isSelected = selectedColor == Color.Magenta) {
-                        selectedColor = Color.Magenta
-                    }
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text(if (note == null) "Add Note" else "Edit Note") })
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(selectedColor)
+        ) {
+            Row(modifier = Modifier.padding(8.dp)) {
+                ColorCircle(color = Color.White, isSelected = selectedColor == Color.White) {
+                    selectedColor = Color.White
                 }
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = {title = it},
-                    label = {Text("Title")},
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Column(modifier = Modifier
+                ColorCircle(color = Color.Yellow, isSelected = selectedColor == Color.Yellow) {
+                    selectedColor = Color.Yellow
+                }
+                ColorCircle(color = Color.Green, isSelected = selectedColor == Color.Green) {
+                    selectedColor = Color.Green
+                }
+                ColorCircle(color = Color.Cyan, isSelected = selectedColor == Color.Cyan) {
+                    selectedColor = Color.Cyan
+                }
+                ColorCircle(color = Color.Magenta, isSelected = selectedColor == Color.Magenta) {
+                    selectedColor = Color.Magenta
+                }
+            }
+            OutlinedTextField(
+                value = title,
+                onValueChange = { title = it },
+                label = { Text("Title") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Column(
+                modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f) //allow content to take up remaining space
                     .background(selectedColor)
-                ){
-                    TextField(
-                        value = content,
-                        onValueChange = { content = it },
-                        label = {Text("Content")},
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight(),
-                        shape = RoundedCornerShape(4.dp)
-                    )
+            ) {
+                TextField(
+                    value = content,
+                    onValueChange = { content = it },
+                    label = { Text("Content") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    shape = RoundedCornerShape(4.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Row {
+                Button(
+                    onClick = {
+                        val updatedNote = note?.copy(
+                            title = title,
+                            content = content,
+                            backgroundColor = selectedColor
+                        ) ?: NoteData(
+                            title = title,
+                            content = content,
+                            isDone = false,
+                            backgroundColor = selectedColor
+                        )
+                        onConfirm(updatedNote)
+                        onNavigateBack()
+                    },
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text("Save")
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        },
-        confirmButton = {
-            Button(onClick = {
-                onConfirm(title.ifBlank { "" }, content.ifBlank { "" })
-                title = ""
-                content = ""
-                selectedColor = Color.White
-            }) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancel")
+                //Cancel button
+                Button(
+                    onClick = onNavigateBack,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text("Cancel")
+                }
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -301,8 +323,3 @@ fun ColorCircle(color: Color, isSelected: Boolean, onColorSelected: () -> Unit) 
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Note()
-}
