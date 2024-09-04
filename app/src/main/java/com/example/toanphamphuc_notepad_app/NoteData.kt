@@ -2,7 +2,7 @@ package com.example.toanphamphuc_notepad_app
 
 import androidx.compose.ui.graphics.Color
 
-data class NoteData (
+data class NoteData(
     val id: Int = 0,
     var title: String = "",
     var content: String = "",

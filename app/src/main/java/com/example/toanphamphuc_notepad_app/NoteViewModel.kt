@@ -1,5 +1,6 @@
 package com.example.toanphamphuc_notepad_app
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 
@@ -8,8 +9,8 @@ class NoteViewModel : ViewModel() {
     val notesLiveData: List<NoteData> = _notesLiveData
     private var nextId = 1
 
-    fun addNote(title: String, content: String) {
-        val newNote = NoteData(id = nextId++, title = title, content = content)
+    fun addNote(title: String, content: String, backgroundColor: Color = Color.White) {
+        val newNote = NoteData(id = nextId++, title = title, content = content, backgroundColor = backgroundColor)
         _notesLiveData.add(newNote)
     }
 

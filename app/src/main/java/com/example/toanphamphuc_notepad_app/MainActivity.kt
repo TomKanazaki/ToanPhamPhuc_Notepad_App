@@ -38,6 +38,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
@@ -65,28 +67,33 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+//@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun Note() {
     val viewModel: NoteViewModel = viewModel()
     val navController = rememberNavController()
-    //var showDialog by remember { mutableStateOf(false) }
     var editingNote by remember { mutableStateOf<NoteData?>(null) }
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
     Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Notepad") })
-        },
+//        topBar = {
+//            TopAppBar(title = { Text("Notepad") })
+//        },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    editingNote = null
-                    navController.navigate("noteEdit")
-                },
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Icon(Icons.Filled.AddCircle, contentDescription = "Add Note")
+            if (currentRoute == "noteList") { //only show the + (add button) when at the notes' list page
+                FloatingActionButton(
+                    onClick = {
+                        editingNote = null
+                        //selectedColor = Color.White
+                        navController.navigate("noteEdit")
+                    },
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Icon(Icons.Filled.AddCircle, contentDescription = "Add Note")
+                }
             }
         }
     ) {paddingValues ->
@@ -106,7 +113,9 @@ fun Note() {
             composable("noteEdit") {
                 NoteEditScreen(
                     note = editingNote,
+                    //initialColor = selectedColor,
                     onConfirm = { updatedNote ->
+                        //selectedColor = updatedNote.backgroundColor
                         if (editingNote == null) {viewModel.addNote(updatedNote.title, updatedNote.content)}
                         else {
                             viewModel.updateNote(updatedNote)
@@ -152,35 +161,44 @@ fun NoteItem(
     var showDeleteConfirmation by remember {
         mutableStateOf(false)
     }
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
+        color = note.backgroundColor,
+        shape = RoundedCornerShape(8.dp)
     ) {
-        Row(
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(8.dp)
+            //.background(note.backgroundColor, shape = RoundedCornerShape(8.dp))
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = note.title.ifBlank { "No title" }, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                Text(text = note.content.ifBlank { "No content" }, fontWeight = FontWeight.Light, style = MaterialTheme.typography.bodyMedium)
-            }
-            IconButton(onClick = {onDoneChange(note)}) {
-                Icon(
-                    imageVector = if(note.isDone) Icons.Filled.CheckCircle else Icons.Default.AddCircle,
-                    contentDescription = if (note.isDone) "Mark as Undone" else "Mark as Done",
-                    tint = if (note.isDone) MaterialTheme.colorScheme.primary else LocalContentColor.current.copy(alpha = 0.3f)
-                )
-            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = note.title.ifBlank { "No title" }, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                    Text(text = note.content.ifBlank { "No content" }, fontWeight = FontWeight.Light, style = MaterialTheme.typography.bodyMedium)
+                }
+                IconButton(onClick = {onDoneChange(note)}) {
+                    Icon(
+                        imageVector = if(note.isDone) Icons.Filled.CheckCircle else Icons.Default.AddCircle,
+                        contentDescription = if (note.isDone) "Mark as Undone" else "Mark as Done",
+                        tint = if (note.isDone) MaterialTheme.colorScheme.primary else LocalContentColor.current.copy(alpha = 0.3f)
+                    )
+                }
 
-            IconButton(onClick = {onEditClick(note) }) {
-                Icon(Icons.Filled.Edit, contentDescription = "Edit Note")
-            }
+                IconButton(onClick = {onEditClick(note) }) {
+                    Icon(Icons.Filled.Edit, contentDescription = "Edit Note")
+                }
 
-            IconButton(onClick = {showDeleteConfirmation = true}) {
-                Icon(Icons.Filled.Delete, contentDescription = "Delete Note")
+                IconButton(onClick = {showDeleteConfirmation = true}) {
+                    Icon(Icons.Filled.Delete, contentDescription = "Delete Note")
+                }
             }
         }
     }
@@ -213,6 +231,7 @@ fun NoteItem(
 @Composable
 fun NoteEditScreen(
     note: NoteData?,
+//    initialColor: Color, //
     onConfirm: (NoteData) -> Unit,
     onNavigateBack: () -> Unit
 ) {
