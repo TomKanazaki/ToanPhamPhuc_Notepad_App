@@ -1,10 +1,10 @@
-package com.example.toanphamphuc_notepad_app.packages
+package com.example.toanphamphuc_notepad_app.old_packages
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.toanphamphuc_notepad_app.NoteData
+import com.example.toanphamphuc_notepad_app.viewModel_Data.NoteData
 
 @Database(entities = [NoteData::class], version = 1)
 abstract class AppDatabase: RoomDatabase() {
