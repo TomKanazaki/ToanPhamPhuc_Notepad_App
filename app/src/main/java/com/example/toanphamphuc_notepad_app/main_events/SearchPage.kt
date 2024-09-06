@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+//This composable is responsible for displaying a search page with a search bar and search icon.
 @Composable
 fun SearchPage(
     searchQuery: String,

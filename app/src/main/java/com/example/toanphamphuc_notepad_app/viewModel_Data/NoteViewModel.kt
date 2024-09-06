@@ -7,9 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class NoteViewModel : ViewModel() {
-//    private val _notesLiveData = mutableStateListOf<NoteData>()
     private val _notesLiveData = MutableStateFlow<List<NoteData>>(emptyList())
-    //val notesLiveData: List<NoteData> = _notesLiveData
     val notesLiveData: StateFlow<List<NoteData>> = _notesLiveData.asStateFlow()
 
     private val _deleteNotesLiveData = MutableStateFlow<List<NoteData>>(emptyList())
@@ -22,13 +20,25 @@ class NoteViewModel : ViewModel() {
         _notesLiveData.value += newNote
     }
 
-    fun deleteNote(noteId: Int) {
-        _notesLiveData.value = _notesLiveData.value.filter { it.id != noteId }
+    fun updateNote(updatedNote: NoteData) {
+        _notesLiveData.value = _notesLiveData.value.map { if (it.id == updatedNote.id) updatedNote else it }
+    }
+
+    fun moveNoteToTrash(note: NoteData) {
+        deleteNote(note.id)
     }
 
     fun restoreNote(note: NoteData) {
-        _deleteNotesLiveData.value = _deleteNotesLiveData.value.filter { it.id != note.id   }
+        _deleteNotesLiveData.value = _deleteNotesLiveData.value.filter { it.id != note.id }
         _notesLiveData.value += note
+    }
+
+    private fun deleteNote(noteId: Int) {
+        val noteToDelete = _notesLiveData.value.find { it.id == noteId }
+        _notesLiveData.value = _notesLiveData.value.filter { it.id != noteId }
+        if (noteToDelete != null) {
+            _deleteNotesLiveData.value += noteToDelete
+        }
     }
 
     fun permanentlyDeleteNote(noteId: Int) {
@@ -37,13 +47,5 @@ class NoteViewModel : ViewModel() {
 
     fun deleteAllTrash() {
         _deleteNotesLiveData.value = emptyList()
-    }
-
-    fun updateNote(updatedNote: NoteData) {
-//        val index = _notesLiveData.indexOfFirst { it.id == updatedNote.id }
-//        if (index != -1) {
-//            _notesLiveData[index] = updatedNote
-//        }
-        _notesLiveData.value = _notesLiveData.value.map { if (it.id == updatedNote.id) updatedNote else it }
     }
 }

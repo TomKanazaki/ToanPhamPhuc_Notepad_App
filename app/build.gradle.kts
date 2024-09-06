@@ -76,8 +76,12 @@ dependencies {
     //import room
     implementation(libs.androidx.room.ktx)
 
-    //import nagivation
+    //import navigation
     implementation(libs.androidx.navigation.compose)
+
+    //import extended material icons
+    implementation("androidx.compose.material:material-icons-extended")
+
 
 }
 

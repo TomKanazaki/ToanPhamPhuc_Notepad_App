@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
+//This composable is responsible for displaying a color circle with an optional selection indicator.
+//
 @Composable
 fun ColorCircle(color: Color, isSelected: Boolean, onColorSelected: () -> Unit) {
     Box(

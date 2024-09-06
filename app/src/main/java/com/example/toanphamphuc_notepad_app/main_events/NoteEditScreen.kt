@@ -27,6 +27,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.toanphamphuc_notepad_app.viewModel_Data.NoteData
 
+//This composable is responsible for displaying a note edit screen,
+// It allows users to edit the title, content, and color of a note,
+// the user can also save or cancel the changes.
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteEditScreen(
@@ -105,7 +109,7 @@ fun NoteEditScreen(
                             backgroundColor = selectedColor
                         )
                         onConfirm(updatedNote)
-                        onNavigateBack()
+                        //onNavigateBack()
                     },
                     modifier = Modifier.padding(16.dp)
                 ) {
