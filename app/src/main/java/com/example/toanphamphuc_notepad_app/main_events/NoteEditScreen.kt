@@ -29,13 +29,12 @@ import com.example.toanphamphuc_notepad_app.viewModel_Data.NoteData
 
 //This composable is responsible for displaying a note edit screen,
 // It allows users to edit the title, content, and color of a note,
-// the user can also save or cancel the changes.
+// the user can also save or cancel the changes.  integrates seamlessly
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteEditScreen(
     note: NoteData?,
-//    initialColor: Color, //
     onConfirm: (NoteData) -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -109,7 +108,6 @@ fun NoteEditScreen(
                             backgroundColor = selectedColor
                         )
                         onConfirm(updatedNote)
-                        //onNavigateBack()
                     },
                     modifier = Modifier.padding(16.dp)
                 ) {

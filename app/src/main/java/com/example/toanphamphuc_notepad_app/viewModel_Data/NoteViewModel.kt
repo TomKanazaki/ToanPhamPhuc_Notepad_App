@@ -7,27 +7,36 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class NoteViewModel : ViewModel() {
-    private val _notesLiveData = MutableStateFlow<List<NoteData>>(emptyList())
-    val notesLiveData: StateFlow<List<NoteData>> = _notesLiveData.asStateFlow()
+    private val _notesLiveData = MutableStateFlow<List<NoteData>>(emptyList()) //holds the list of active note
+    val notesLiveData: StateFlow<List<NoteData>> = _notesLiveData.asStateFlow() //exposes the active notes list
 
-    private val _deleteNotesLiveData = MutableStateFlow<List<NoteData>>(emptyList())
-    val deleteNotesLiveData: StateFlow<List<NoteData>> = _deleteNotesLiveData.asStateFlow()
+    private val _deleteNotesLiveData = MutableStateFlow<List<NoteData>>(emptyList()) //holds the list of deleted notes
+    val deleteNotesLiveData: StateFlow<List<NoteData>> = _deleteNotesLiveData.asStateFlow() //exposes the deleted notes list
 
-    private var nextId = 1
+    private var nextId = 1 //keeps track of the next available note ID
 
+
+    //METHODS
+    //adds a new note to the list of active notes
     fun addNote(title: String, content: String, backgroundColor: Color) {
         val newNote = NoteData(id = nextId++, title = title, content = content, backgroundColor = backgroundColor)
         _notesLiveData.value += newNote
     }
 
+    //updates an existing note in the list of active notes
     fun updateNote(updatedNote: NoteData) {
         _notesLiveData.value = _notesLiveData.value.map { if (it.id == updatedNote.id) updatedNote else it }
     }
+
+    //marks a note as done or undone
+    // !!!!! TODO
+
 
     fun moveNoteToTrash(note: NoteData) {
         deleteNote(note.id)
     }
 
+    //restore deleted note from the list of deleted notes back to the list of active notes
     fun restoreNote(note: NoteData) {
         _deleteNotesLiveData.value = _deleteNotesLiveData.value.filter { it.id != note.id }
         _notesLiveData.value += note

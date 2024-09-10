@@ -32,10 +32,6 @@ import com.example.toanphamphuc_notepad_app.viewModel_Data.NoteData
 
 //This composable is responsible for displaying a list of notes in a grid view.
 @Composable
-fun NoteGrid() {
-
-}
-@Composable
 fun NoteGridItem(
     note: NoteData,
     onDoneChange: (NoteData) -> Unit,

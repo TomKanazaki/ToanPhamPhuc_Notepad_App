@@ -44,14 +44,12 @@ import kotlinx.coroutines.flow.StateFlow
 // Displays a list of notes, allowing users to interact with them (mark as done, delete, edit)
 @Composable
 fun NoteList(
-    notes: StateFlow<List<NoteData>>,
+    notes: StateFlow<List<NoteData>>, //using StateFlow to observe changes in the list of notes
     onDoneChange: (NoteData) -> Unit,
     onDeleteClick: (NoteData) -> Unit,
     onEditClick: (NoteData) -> Unit,
     currentView: String,
-    onCurrentViewChange: (String) -> Unit,
     sortOption: String,
-    onSortOptionChange: (String) -> Unit
 ) {
     val currentNotes by notes.collectAsState()
     val sortedNotes = when (sortOption) {
