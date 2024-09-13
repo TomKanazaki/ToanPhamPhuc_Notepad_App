@@ -29,8 +29,9 @@ class NoteViewModel : ViewModel() {
     }
 
     //marks a note as done or undone
-    // !!!!! TODO
-
+    fun toggleDone(note: NoteData) {
+        _notesLiveData.value = _notesLiveData.value.map { if (it.id == note.id) { it.copy(isDone = !it.isDone) } else it }
+    }
 
     fun moveNoteToTrash(note: NoteData) {
         deleteNote(note.id)
@@ -50,11 +51,17 @@ class NoteViewModel : ViewModel() {
         }
     }
 
+    //TODO: delete permanently
     fun permanentlyDeleteNote(noteId: Int) {
         _deleteNotesLiveData.value = _deleteNotesLiveData.value.filter { it.id != noteId }
     }
 
+    //TODO: delete all permanently
     fun deleteAllTrash() {
         _deleteNotesLiveData.value = emptyList()
+    }
+
+    fun toggleStar(note: NoteData) {
+        _notesLiveData.value = _notesLiveData.value.map { if (it.id == note.id) { it.copy(isStarred = !it.isStarred) } else it }
     }
 }

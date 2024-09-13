@@ -33,14 +33,15 @@ fun NavigationGraph(
         composable("noteList") {
             NoteList(
                 notes = viewModel.notesLiveData,
-                onDoneChange = { viewModel.updateNote(it) },
-                onDeleteClick = { viewModel.moveNoteToTrash(it) },
+                onDoneChange = {  note -> viewModel.toggleDone(note) },
+                onDeleteClick = { note -> viewModel.moveNoteToTrash(note) },
                 onEditClick = { note ->
                     onEditingNoteChange(note)
                     navController.navigate("noteEdit")
                 },
+                onToggleStar = { note -> viewModel.toggleStar(note) },
                 currentView = currentView,
-                sortOption = sortOption,
+                sortOption = sortOption
             )
         }
         composable("noteEdit") {

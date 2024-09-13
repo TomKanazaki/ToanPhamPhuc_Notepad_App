@@ -1,6 +1,5 @@
 package com.example.toanphamphuc_notepad_app.main_events
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +18,8 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -41,65 +42,72 @@ import androidx.compose.ui.unit.dp
 import com.example.toanphamphuc_notepad_app.viewModel_Data.NoteData
 import kotlinx.coroutines.flow.StateFlow
 
+@Composable
+fun sortNotes(notes: List<NoteData>, sortOption: String): List<NoteData> {
+    return when (sortOption) {
+        "name_asc" -> notes
+            .sortedWith(compareByDescending<NoteData> { it.isStarred }
+                .thenBy { it.title })
+
+        "name_desc" -> notes
+            .sortedWith(compareByDescending<NoteData> { it.isStarred }
+                .thenByDescending { it.title })
+
+        else -> notes.sortedByDescending { it.isStarred }
+    }
+}
+
 // Displays a list of notes, allowing users to interact with them (mark as done, delete, edit)
 @Composable
 fun NoteList(
-    notes: StateFlow<List<NoteData>>, //using StateFlow to observe changes in the list of notes
+    notes: StateFlow<List<NoteData>>,
     onDoneChange: (NoteData) -> Unit,
     onDeleteClick: (NoteData) -> Unit,
     onEditClick: (NoteData) -> Unit,
+    onToggleStar: (NoteData) -> Unit,
     currentView: String,
-    sortOption: String,
+    sortOption: String
 ) {
     val currentNotes by notes.collectAsState()
-    val sortedNotes = when (sortOption) {
-        "name_asc" -> currentNotes.sortedBy { it.title }
-        "name_desc" -> currentNotes.sortedByDescending { it.title }
-        else -> currentNotes
-    }
+
+    val sortedNotes = sortNotes(currentNotes, sortOption)
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // View toggle
-            if (currentView == "list") {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                ) {
-                    item { Spacer(modifier = Modifier.height(16.dp)) }
-                    items(sortedNotes) { note ->
-                        NoteItem(
-                            note = note,
-                            onDoneChange = onDoneChange,
-                            onDeleteClick = onDeleteClick,
-                            onEditClick = onEditClick
-                        )
-                    }
+        // View toggle
+        if (currentView == "list") {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+                items(sortedNotes) { note ->
+                    NoteItem(
+                        note = note,
+                        onDoneChange = onDoneChange,
+                        onDeleteClick = onDeleteClick,
+                        onEditClick = onEditClick,
+                        onToggleStar = onToggleStar
+                    )
                 }
-            } else {
-                // Grid view
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    items(sortedNotes) { note ->
-                        NoteGridItem(
-                            note = note,
-                            onDoneChange = onDoneChange,
-                            onDeleteClick = onDeleteClick,
-                            onEditClick = onEditClick
-                        )
-                    }
+            }
+        } else {
+            // Grid view
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.padding(16.dp)
+            ) {
+                items(sortedNotes) { note ->
+                    NoteGridItem(
+                        note = note,
+                        onDoneChange = onDoneChange,
+                        onDeleteClick = onDeleteClick,
+                        onEditClick = onEditClick
+                    )
                 }
             }
         }
+
     }
 }
 
@@ -109,7 +117,8 @@ fun NoteItem(
     note: NoteData,
     onDoneChange: (NoteData) -> Unit,
     onDeleteClick: (NoteData) -> Unit,
-    onEditClick: (NoteData) -> Unit
+    onEditClick: (NoteData) -> Unit,
+    onToggleStar: (NoteData) -> Unit
 ) {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
 
@@ -159,28 +168,35 @@ fun NoteItem(
                 IconButton(onClick = { showDeleteConfirmation = true }) {
                     Icon(Icons.Filled.Delete, contentDescription = "Delete Note")
                 }
+
+                IconButton(onClick = { onToggleStar(note) }) {
+                    Icon(
+                        imageVector = if (note.isStarred) Icons.Filled.Star else Icons.Filled.StarBorder,
+                        contentDescription = if (note.isStarred) "Unstar" else "Star"
+                    )
+                }
             }
         }
-    }
 
-    if (showDeleteConfirmation) {
-        AlertDialog(
-            onDismissRequest = { showDeleteConfirmation = false },
-            title = { Text("Delete Note") },
-            text = { Text("Are you sure you want to delete '${note.title}'?") },
-            dismissButton = {
-                Button(onClick = { showDeleteConfirmation = false }) {
-                    Text("No")
+        if (showDeleteConfirmation) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirmation = false },
+                title = { Text("Delete Note") },
+                text = { Text("Are you sure you want to delete '${note.title}'?") },
+                dismissButton = {
+                    Button(onClick = { showDeleteConfirmation = false }) {
+                        Text("No")
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        onDeleteClick(note)
+                        showDeleteConfirmation = false
+                    }) {
+                        Text("Yes")
+                    }
                 }
-            },
-            confirmButton = {
-                Button(onClick = {
-                    onDeleteClick(note)
-                    showDeleteConfirmation = false
-                }) {
-                    Text("Yes")
-                }
-            }
-        )
+            )
+        }
     }
 }

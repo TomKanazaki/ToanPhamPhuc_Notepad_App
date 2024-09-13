@@ -6,7 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -20,13 +24,15 @@ fun ColorCircle(color: Color, isSelected: Boolean, onColorSelected: () -> Unit) 
             .size(32.dp)
             .background(color, shape = CircleShape)
             .clickable { onColorSelected() }
-            .padding(4.dp)
+            .padding(4.dp),
+        contentAlignment = Alignment.Center
     ) {
         if (isSelected) {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .background(Color.Black, shape = CircleShape)
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = "Selected",
+                tint = Color.Black,
+                modifier = Modifier.size(16.dp)
             )
         }
     }

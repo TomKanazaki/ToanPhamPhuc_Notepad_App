@@ -8,5 +8,6 @@ data class NoteData(
     var title: String = "", //note's title
     var content: String = "", //note's content
     var isDone: Boolean = false, //whether the note is done or not (with default value false)
-    var backgroundColor: Color = Color.White //note's background color, defaulting to White
+    var backgroundColor: Color = Color.White, //note's background color, defaulting to White
+    var isStarred: Boolean = false //whether the note is starred (loved) or not
 )

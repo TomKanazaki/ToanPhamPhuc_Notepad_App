@@ -68,9 +68,9 @@ fun NoteListScreen() {
     //control edit page
     var editingNote by remember { mutableStateOf<NoteData?>(null) }
     //control view by list or grid
-    val currentView by remember { mutableStateOf("list") }
+    var currentView by remember { mutableStateOf("list") }
     //control sort option view: name_asc or name_desc
-    val sortOption by remember { mutableStateOf("name_asc") }
+    var sortOption by remember { mutableStateOf("name_asc") }
 
     //navigation variables
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -86,7 +86,10 @@ fun NoteListScreen() {
                 currentRoute = currentRoute ?: "noteList",
                 navController = navController,
                 showOptionsMenu = showMainOptionsMenu,
-                showSortMenuParam = showSortMenu
+                showSortMenuParam = showSortMenu,
+                currentView = currentView,
+                onViewChange = { currentView = it },
+                onSortChange = { sortOption = it }
             )
         },
         floatingActionButton = {
@@ -125,7 +128,10 @@ fun CustomTopAppBar(
     currentRoute: String,
     navController: NavController,
     showOptionsMenu: Boolean,
-    showSortMenuParam: Boolean
+    showSortMenuParam: Boolean,
+    currentView: String,
+    onViewChange: (String) -> Unit,
+    onSortChange: (String) -> Unit
 ) {
     val title = when (currentRoute) {
         "userData" -> "User Data"
@@ -137,10 +143,8 @@ fun CustomTopAppBar(
 
     // Control menu states
     var showMainOptionsMenu by remember { mutableStateOf(showOptionsMenu) }
-    var showSortMenu by remember { mutableStateOf(showSortMenuParam) }
     var showViewMenu by remember { mutableStateOf(false) }
-    var currentView by remember { mutableStateOf("list") }
-    var sortOption by remember { mutableStateOf("name_asc") }
+    var showSortMenu by remember { mutableStateOf(showSortMenuParam) }
 
     TopAppBar(
         title = { Text(title) },
@@ -248,14 +252,14 @@ fun CustomTopAppBar(
             ) {
                 DropdownMenuItem(
                     onClick = {
-                        currentView = "list"
+                        onViewChange("list")
                         showViewMenu = false
                     },
                     text = { Text("List") }
                 )
                 DropdownMenuItem(
                     onClick = {
-                        currentView = "grid"
+                        onViewChange("grid")
                         showViewMenu = false
                     },
                     text = { Text("Grid") }
@@ -275,14 +279,14 @@ fun CustomTopAppBar(
             ) {
                 DropdownMenuItem(
                     onClick = {
-                        sortOption = "name_asc"
+                        onSortChange("name_asc")
                         showSortMenu = false
                     },
                     text = { Text("Name A-Z") }
                 )
                 DropdownMenuItem(
                     onClick = {
-                        sortOption = "name_desc"
+                        onSortChange("name_desc")
                         showSortMenu = false
                     },
                     text = { Text("Name Z-A") }
