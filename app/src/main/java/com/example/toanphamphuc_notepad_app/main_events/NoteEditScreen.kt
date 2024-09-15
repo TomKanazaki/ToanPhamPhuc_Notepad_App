@@ -15,7 +15,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -76,14 +75,16 @@ fun NoteEditScreen(
                 label = { Text("Title") },
                 modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(modifier = Modifier.height(8.dp))
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f) //allow content to take up remaining space
                     .background(selectedColor)
             ) {
-                TextField(
+                OutlinedTextField(
                     value = content,
                     onValueChange = { content = it },
                     label = { Text("Content") },

@@ -102,7 +102,8 @@ fun NoteList(
                         note = note,
                         onDoneChange = onDoneChange,
                         onDeleteClick = onDeleteClick,
-                        onEditClick = onEditClick
+                        onEditClick = onEditClick,
+                        onToggleStar = onToggleStar
                     )
                 }
             }
@@ -147,7 +148,7 @@ fun NoteItem(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = note.content.ifBlank { "No content" },
+                        text = note.content.ifBlank { "No content" }.take(15) + if(note.content.length>15) "..." else "",
                         fontWeight = FontWeight.Light,
                         style = MaterialTheme.typography.bodyMedium
                     )

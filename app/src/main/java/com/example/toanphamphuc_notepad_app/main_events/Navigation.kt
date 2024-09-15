@@ -4,6 +4,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -20,11 +24,10 @@ fun NavigationGraph(
     sortOption: String,
     editingNote: NoteData?,
     onEditingNoteChange: (NoteData?) -> Unit,
-    searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
-    onSearch: () -> Unit,
-    onDismissSearch: () -> Unit
+    onSearch: () -> Unit
 ) {
+    var searchQuery by remember { mutableStateOf("") }
+
     NavHost(
         navController = navController,
         startDestination = "noteList",
@@ -72,6 +75,10 @@ fun NavigationGraph(
             TrashScreen(
                 deletedNotes = viewModel.deleteNotesLiveData.collectAsState().value,
                 onRestoreClick = { note -> viewModel.restoreNote(note) },
+                onRestoreAll = { viewModel.restoreAllNotes() },
+                onDeleteAll = { viewModel.deleteAllTrash() },
+                onViewChange = { currentView -> viewModel.setView(currentView) },
+                currentView = viewModel.currentView.collectAsState().value
             )
         }
         composable("settings") {
@@ -79,10 +86,17 @@ fun NavigationGraph(
         }
         composable("search") {
             SearchPage(
+                notesFlow = viewModel.notesLiveData,
                 searchQuery = searchQuery,
-                onSearchQueryChange = onSearchQueryChange,
+                onSearchQueryChange = { newQuery -> searchQuery = newQuery },
                 onSearch = onSearch,
-                onDismiss = onDismissSearch,
+                onDoneChange = { note -> viewModel.toggleDone(note) },
+                onDeleteClick = { note -> viewModel.moveNoteToTrash(note) },
+                onEditClick = { note ->
+                    onEditingNoteChange(note)
+                    navController.navigate("noteEdit")
+                },
+                onToggleStar = { note -> viewModel.toggleStar(note) }
             )
         }
     }

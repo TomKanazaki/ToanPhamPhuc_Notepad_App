@@ -15,6 +15,12 @@ class NoteViewModel : ViewModel() {
 
     private var nextId = 1 //keeps track of the next available note ID
 
+    private val _currentView = MutableStateFlow("list") // Default view
+    val currentView: StateFlow<String> = _currentView.asStateFlow()
+
+    fun setView(view: String) {
+        _currentView.value = view
+    }
 
     //METHODS
     //adds a new note to the list of active notes
@@ -51,13 +57,16 @@ class NoteViewModel : ViewModel() {
         }
     }
 
-    //TODO: delete permanently
     fun permanentlyDeleteNote(noteId: Int) {
         _deleteNotesLiveData.value = _deleteNotesLiveData.value.filter { it.id != noteId }
     }
 
-    //TODO: delete all permanently
     fun deleteAllTrash() {
+        _deleteNotesLiveData.value = emptyList()
+    }
+
+    fun restoreAllNotes() {
+        _notesLiveData.value += _deleteNotesLiveData.value
         _deleteNotesLiveData.value = emptyList()
     }
 
